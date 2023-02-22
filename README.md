@@ -42,7 +42,11 @@ Cоздать и активировать виртуальное окружен�
 python3 -m venv env
 ```
 ```
+Для Windows:
 source env/scripts/activate
+
+Для Linux или macos
+source env/bin/activate
 ```
 ```
 python3 -m pip install --upgrade pip
