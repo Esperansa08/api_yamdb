@@ -1,7 +1,6 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 
-User = get_user_model()
+from users.models import User
 
 
 class Genre(models.Model):
@@ -22,19 +21,20 @@ class Title(models.Model):
         verbose_name='название произведения',
         help_text='Введите название произведения')
     year = models.IntegerField(default=2023,
-        verbose_name='год публикации',
-        help_text='Введите год публикации произведения')
-    description = models.TextField(default='описание',verbose_name='Описание')
+                               verbose_name='год публикации',
+                               help_text='Введите год публикации произведения')
+    description = models.TextField(default='описание', verbose_name='Описание')
     genre = models.ManyToManyField(
         Genre,
-        through='GenreTitle')#,
-        # blank=True,
-        # null=True,
-        # on_delete=models.SET_NULL,
-        #related_name='titles'),
-        # verbose_name='Жанр произведения',
-        # help_text='Жанр, к которой относиться произведение')
-    category =  models.ForeignKey(
+        through='GenreTitle')
+    # ,
+    # blank=True,
+    # null=True,
+    # on_delete=models.SET_NULL,
+    # related_name='titles'),
+    # verbose_name='Жанр произведения',
+    # help_text='Жанр, к которой относиться произведение')
+    category = models.ForeignKey(
         'Category',
         blank=True,
         null=True,
@@ -49,8 +49,8 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name[:15]
-    
-        
+
+
 class Category(models.Model):
     name = models.CharField(
         max_length=256,
@@ -74,4 +74,34 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return f'{self.title} {self.genre}'
-    
+
+
+class Review(models.Model):
+    title = models.ForeignKey(
+        Title,
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
+        related_name='Review',
+        verbose_name='Отзыв на произведение',
+    )
+    text = models.TextField(
+        'Текст отзыва',
+        help_text='Введите текст отзыва',
+    )
+    author = models.ForeignKey(
+        User,
+        null=False,
+        on_delete=models.CASCADE,
+        verbose_name='Автор отзыва',
+        help_text='Автор отзыва'
+    )
+    score = models.IntegerField()
+    pub_date = models.DateTimeField(
+        'Дата публикации отзыва',
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        ordering = ('-pub_date',)
