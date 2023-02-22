@@ -7,9 +7,9 @@ class User(AbstractUser):
     ADMIN = 'admin'
     MODERATOR = 'moderator'
     ROLES = [
-        (USER, 'user'),
-        (ADMIN, 'admin'),
-        (MODERATOR, 'moderator')
+        (USER, 'Пользователь'),
+        (ADMIN, 'Администратор'),
+        (MODERATOR, 'Модератор')
     ]
     username = models.SlugField(
         max_length=150,
@@ -30,12 +30,9 @@ class User(AbstractUser):
         default=USER,
         verbose_name='Права доступа'
     )
-    confirmation_code = models.CharField(
-        max_length=50,
-        blank=True,
-        verbose_name='Код подтверждения авторизации'
-    )
+    
 
     class Meta:
         ordering = ['id']
-
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
