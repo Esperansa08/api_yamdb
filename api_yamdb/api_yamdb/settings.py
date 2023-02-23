@@ -2,12 +2,14 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
-from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = get_random_secret_key()
-SECRET_KEY = 'p&l%385148kxxhtyn^##a1)ilz@4zqj=rq&afdox^##zgl9(vs'
+
+SECRET_KEY  = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
@@ -32,8 +34,7 @@ INSTALLED_APPS = [
 ]
 
 THIRD_PARTY_APPS = ('rest_framework',
-                    'django_filters',
-                    'djoser',)
+                    'django_filters',)
 
 LOCAL_APPS = ('api',
               'users',
