@@ -6,15 +6,17 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import permissions, status, viewsets, filters
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+# from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from users.models import User
 from api.serializers import (TitleSerializer, GenreSerializer,
-                             CategorySerializer, SignupSerializer, TokenSerializer)
-from reviews.models import Category, Genre, Title
+                             CategorySerializer, SignupSerializer,
+                             TokenSerializer, ReviewSerializer,
+                             CommentSerializer)
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 @api_view(['POST'])
@@ -58,15 +60,16 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year', 'category')#,'genres') 
-    
+    filterset_fields = ('name', 'year', 'category')  # ,'genres')
+
     # def perform_create(self, serializer):
     #     serializer.save(genres=self.request.genres)
 
     def get_serializer_class(self):
         if self.action == 'list':
             return TitleSerializer
-        return TitleSerializer 
+        return TitleSerializer
+
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
@@ -76,6 +79,7 @@ class GenreViewSet(viewsets.ModelViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -83,3 +87,22 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        title_id = self.kwargs.get("title_id")
+        return Review.objects.filter(title=title_id)
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user,
+            title=Title.objects.get(pk=self.kwargs.get("title_id"))
+        )
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
