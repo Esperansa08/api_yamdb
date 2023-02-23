@@ -2,7 +2,7 @@
 import datetime as dt
 
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from rest_framework import serializers
 # from rest_framework.exceptions import ValidationError
 # from rest_framework.validators import UniqueTogetherValidator
@@ -103,10 +103,37 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all(),
+        default=serializers.CurrentUserDefault(),
+    )
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        queryset=Title.objects.all(),
+        default=1
+    )
+
+    def validate_score(self, value):
+        if not (value in range(1, 10)):
+            raise serializers.ValidationError(
+                'Оценка должна быть в пределах от 1 до 10')
+        return value
+
+    def validate_title(self, value):
+        return Title.objects.get(
+            pk=self.context['view'].kwargs.get("title_id"))
 
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = ('id', 'title', 'text', 'author', 'score', 'pub_date')
+        read_only_fields = ('title',)
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('author', 'title')
+            )
+        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
