@@ -14,8 +14,9 @@ from rest_framework_simplejwt.tokens import AccessToken
 from users.models import User
 from api.serializers import (TitleSerializer, GenreSerializer,
                              CategorySerializer, SignupSerializer,
-                             TokenSerializer, ReviewSerializer)
-from reviews.models import Category, Genre, Review, Title
+                             TokenSerializer, ReviewSerializer,
+                             CommentSerializer)
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 @api_view(['POST'])
@@ -90,3 +91,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
