@@ -63,15 +63,21 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year', 'category', 'genres')
+    filterset_fields = ('name', 'year', 'category',)  # 'genres')
 
-    def perform_create(self, serializer):
-        serializer.save(genres=self.request.genres)
+    # def perform_create(self, serializer):
+    #     serializer.save(genres=self.request.genres)
 
     def get_serializer_class(self):
         if self.action == 'list':
             return TitleSerializer
         return TitleSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.action not in ('list', 'retrieve'):
+            context['exclude_fields'] = ['rating']
+        return context
 
 
 class GenreViewSet(viewsets.ModelViewSet):

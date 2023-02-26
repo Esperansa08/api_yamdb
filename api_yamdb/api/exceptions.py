@@ -9,3 +9,7 @@ class TitleOrReviewNotFound(ValidationError):
 
 class BadRating(ValidationError):
     default_detail = 'Оценка должна быть в пределах от 1 до 10'
+
+
+class IncorrectGenresInData(ValidationError):
+    default_detail = 'Переданы некорректные значения жанров'
