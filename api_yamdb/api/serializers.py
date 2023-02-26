@@ -30,7 +30,7 @@ class TitleSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(read_only=True)
 
     class Meta:
-        fields = ('name','year','description','category','genre')
+        fields = ('name', 'year', 'description', 'category', 'genre')
         model = Title
         depth = 1
 

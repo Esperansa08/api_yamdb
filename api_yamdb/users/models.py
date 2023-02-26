@@ -12,7 +12,7 @@ ROLES = [
 
 
 class User(AbstractUser):
-    
+
     username = models.SlugField(
         max_length=150,
         unique=True,
@@ -32,7 +32,7 @@ class User(AbstractUser):
         default=USER,
         verbose_name='Права доступа'
     )
-    
+
     def is_admin(self):
         return (
             self.role == ADMIN
@@ -44,7 +44,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
-
 
     class Meta:
         ordering = ['id']
