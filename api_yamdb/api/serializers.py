@@ -1,45 +1,18 @@
+import datetime as dt
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 from rest_framework import viewsets
-from rest_framework.validators import UniqueValidator
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueValidator
+
 
 from reviews.models import Category, Comment, Genre, Title, Review
 
 from users.models import User
 from api.exceptions import (BadRating)
-
-
-class SignupSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
-    email = serializers.EmailField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
-
-    def validate_username(self, value):
-        if value.lower() == 'me':
-            raise serializers.ValidationError(
-                'Имя пользователя "me" не допустимо')
-        return value
-
-    class Meta:
-        fields = ('username', 'email')
-        model = User
-
-
-class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    confirmation_code = serializers.CharField()
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -124,6 +97,39 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
     )
 
+
+class SignupSerializer(serializers.Serializer):
+    username = serializers.RegexField(
+        r'^[\w.@+-]+$',
+        max_length=150,
+        required=True
+    )
+    email = serializers.EmailField(required=True, max_length=254)
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не допустимо!'
+            )
+        return value
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ['username', 'email', 'first_name',
+                  'last_name', 'bio', 'role']
+        model = User
+        
+
+class TokenSerializer(serializers.Serializer):
+    username = serializers.RegexField(
+        r'^[\w.@+-]+$',
+        max_length=150,
+        required=True
+    )
+    confirmation_code = serializers.CharField(required=True)
+
     def validate_score(self, value):
         if not (value in range(1, 11)):
             raise BadRating()
@@ -141,3 +147,4 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date',)
         read_only_fields = ('id', 'author', 'pub_date',)
+
