@@ -1,7 +1,5 @@
 from django.contrib import admin
-from django.contrib.admin.views.main import ChangeList
 
-from .forms import TitleChangeListForm
 from reviews.models import Title, Genre, Category, GenreTitle, Comment, Review
 
 
@@ -12,11 +10,16 @@ class GenreInline(admin.TabularInline):
 
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'year', 'description','category')#,'genre') 
+    list_display = (
+        'pk',
+        'name',
+        'year',
+        'description',
+        'category')  # ,'genre')
     search_fields = ('name',)
     list_filter = ('year',)
     empty_value_display = '-пусто-'
-    inlines = [ GenreInline, ]
+    inlines = [GenreInline, ]
     exclude = ['genre']
 
 
@@ -24,6 +27,7 @@ class TitleAdmin(admin.ModelAdmin):
 class GenreTitleAdmin(admin.ModelAdmin):
     list_display = ('genre_id', 'title_id')
     ordering = ('-title_id',)
+
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
@@ -36,10 +40,12 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     search_fields = ('name',)
 
+
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('text', 'review_id', 'pub_date', 'author_id')
     search_fields = ('text',)
+
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):

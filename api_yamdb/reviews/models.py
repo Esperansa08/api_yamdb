@@ -24,7 +24,7 @@ class Title(models.Model):
                                verbose_name='год публикации',
                                help_text='Введите год публикации произведения')
     genre = models.ManyToManyField(
-        Genre,  
+        Genre,
         through='GenreTitle')
     category = models.ForeignKey(
         'Category',
@@ -35,7 +35,10 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория произведения',
         help_text='Категория, к которой относиться произведение')
-    description = models.TextField(default='описание', null=True, verbose_name='Описание')
+    description = models.TextField(
+        default='описание',
+        null=True,
+        verbose_name='Описание')
 
     class Meta:
         verbose_name = 'произведение'
@@ -107,7 +110,6 @@ class Review(models.Model):
         verbose_name = 'Отзывы'
 
 
-
 class Comment(models.Model):
     author = models.ForeignKey(
         User,
@@ -130,4 +132,3 @@ class Comment(models.Model):
         ordering = ('-pub_date',)
         verbose_name_plural = 'Комментарии'
         verbose_name = 'Комментарии'
-        
