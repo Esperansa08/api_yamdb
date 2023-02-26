@@ -186,7 +186,6 @@ class CommentViewSet(ReviewCommentViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        print(self.action)
         return self.get_review().comments.all()
 
     def perform_create(self, serializer):
