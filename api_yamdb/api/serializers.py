@@ -96,7 +96,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         queryset=User.objects.all(),
         default=serializers.CurrentUserDefault(),
     )
-
+    
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
 
 class SignupSerializer(serializers.Serializer):
     username = serializers.RegexField(
