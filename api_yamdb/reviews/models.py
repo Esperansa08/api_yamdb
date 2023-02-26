@@ -42,13 +42,6 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория произведения',
         help_text='Категория, к которой относиться произведение')
-    rating = models.DecimalField(
-        decimal_places=2,
-        max_digits=3,
-        verbose_name='Рейтинг произведения',
-        null=True,
-        default=None
-    )
 
     class Meta:
         verbose_name = 'произведение'
