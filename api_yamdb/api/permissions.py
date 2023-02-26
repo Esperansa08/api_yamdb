@@ -2,7 +2,7 @@ from rest_framework import permissions
 
 
 class isAuthorModeratorAdminOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
-    message = 'Нужны хоть какие-нибудь права либо просто читай'
+    message = 'Нужны хоть какие-нибудь права, либо просто читай'
     def has_object_permission(self, request, view, obj):
         return (
             request.method in permissions.SAFE_METHODS
