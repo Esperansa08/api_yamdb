@@ -80,11 +80,11 @@ class GenreTitle(models.Model):
 class Review(models.Model):
     title = models.ForeignKey(
         Title,
+        related_name='reviews',
         blank=False,
         null=False,
         on_delete=models.CASCADE,
         verbose_name='Отзыв на произведение',
-        related_name='reviews',
     )
     text = models.TextField(
         'Текст отзыва',
@@ -119,6 +119,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE,)
     review = models.ForeignKey(
         Review,
+        related_name='comments',
         null=False,
         verbose_name='Комментируемый отзыв',
         on_delete=models.CASCADE)

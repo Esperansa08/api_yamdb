@@ -13,3 +13,7 @@ class BadRating(ValidationError):
 
 class IncorrectGenresInData(ValidationError):
     default_detail = 'Переданы некорректные значения жанров'
+
+
+class IncorrectAuthorReview(ValidationError):
+    default_detail = 'Этот автор уже оставлял отзыв к произведению'

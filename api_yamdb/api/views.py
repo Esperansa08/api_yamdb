@@ -1,5 +1,3 @@
-
-from django.db.models import Avg
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,7 +8,6 @@ from rest_framework import permissions, status, viewsets, filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.serializers import ValidationError
-
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -27,7 +24,7 @@ from api.serializers import (
     ReviewSerializer,
     CommentSerializer,
     UserSerializer)
-from api.exceptions import TitleOrReviewNotFound
+from api.exceptions import TitleOrReviewNotFound, IncorrectAuthorReview
 from reviews.models import Category, Comment, Genre, Review, Title
 
 @api_view(['POST'])
@@ -162,28 +159,18 @@ class ReviewViewSet(ReviewCommentViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
-    def update_rating(self):
-        title = self.get_title()
-        rating = Review.objects.filter(
-            title=title).aggregate(rating=Avg('score'))
-        title.rating = rating['rating']
-        title.save()
-
     def get_queryset(self):
-        return Review.objects.filter(title=self.get_title())
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
         author = self.request.user
         title = self.get_title()
-        if Review.objects.filter(
-                title=title, author=author).exists():
-            raise ValidationError(
-                'Этот автор уже оставлял отзыв к произведению')
+        if title.reviews.filter(author=author).exists():
+            raise IncorrectAuthorReview()
         serializer.save(
             author=author,
             title=title
         )
-        self.update_rating()
 
     def perform_update(self, serializer):
         author = self.request.user
@@ -192,11 +179,6 @@ class ReviewViewSet(ReviewCommentViewSet):
             author=author,
             title=title
         )
-        self.update_rating()
-
-    def perform_destroy(self, instance):
-        super().perform_destroy(instance)
-        self.update_rating()
 
 
 class CommentViewSet(ReviewCommentViewSet):
@@ -204,7 +186,7 @@ class CommentViewSet(ReviewCommentViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        return Comment.objects.filter(review=self.get_review())
+        return self.get_review().comments.all()
 
     def perform_create(self, serializer):
         author = self.request.user
