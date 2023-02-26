@@ -81,7 +81,7 @@ class TitleSerializerWrite(serializers.ModelSerializer):
                                             queryset=Category.objects.all())
     genre = serializers.SlugRelatedField(many=True,
                                          slug_field='slug',
-                                         queryset=Genre.objects.all()) )
+                                         queryset=Genre.objects.all())
 
 
     rating = serializers.SerializerMethodField(read_only=True)

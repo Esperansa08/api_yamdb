@@ -14,8 +14,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from users.models import User
-from api.serializers import (TitleSerializer,
-                              GenreSerializer,TitleSerializerRead,TitleSerializerWrite,
+from api.serializers import (GenreSerializer,TitleSerializerRead,TitleSerializerWrite,
                              CategorySerializer, SignupSerializer,
                              TokenSerializer, ReviewSerializer,
                              CommentSerializer)
