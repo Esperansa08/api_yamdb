@@ -4,11 +4,10 @@ from rest_framework import viewsets
 from rest_framework.validators import UniqueValidator
 from rest_framework import serializers
 
-from reviews.models import Category, Comment, Genre, GenreTitle, Title, Review
+from reviews.models import Category, Comment, Genre, Title, Review
 
 from users.models import User
-from api.exceptions import (BadRating, TitleOrReviewNotFound,
-                            IncorrectGenresInData)
+from api.exceptions import (BadRating)
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -136,6 +135,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(many=False, read_only=True)
 
     class Meta:
         model = Comment
