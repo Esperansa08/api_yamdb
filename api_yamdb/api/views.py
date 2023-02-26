@@ -14,7 +14,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from users.models import User
-from api.serializers import (TitleSerializer, GenreSerializer,
+from api.serializers import (TitleSerializer,
+                              GenreSerializer,TitleSerializerRead,TitleSerializerWrite,
                              CategorySerializer, SignupSerializer,
                              TokenSerializer, ReviewSerializer,
                              CommentSerializer)
@@ -60,7 +61,7 @@ def token(request):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+    serializer_class = (TitleSerializerRead,TitleSerializerWrite)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year', 'category',)  # 'genres')
@@ -70,8 +71,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return TitleSerializer
-        return TitleSerializer
+            return TitleSerializerRead
+        return  TitleSerializerWrite
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

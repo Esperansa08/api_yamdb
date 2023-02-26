@@ -2,41 +2,28 @@ from django.contrib import admin
 from django.contrib.admin.views.main import ChangeList
 
 from .forms import TitleChangeListForm
-from reviews.models import Title, Genre, Category
+from reviews.models import Title, Genre, Category, GenreTitle, Comment, Review
 
 
-# class TitleChangeList(ChangeList):
-
-#     def __init__(self, request, model, list_display,
-#         list_display_links, list_filter, date_hierarchy,
-#         search_fields, list_select_related, list_per_page,
-#         list_max_show_all, list_editable, model_admin):
-
-#         super(TitleChangeList, self).__init__(request, model,
-#             list_display, list_display_links, list_filter,
-#             date_hierarchy, search_fields, list_select_related,
-#             list_per_page, list_max_show_all, list_editable, 
-#             model_admin)
-
-#         # these need to be defined here, and not in MovieAdmin
-#         self.list_display = ['action_checkbox','pk', 'genres']
-#         #self.list_display = ['action_checkbox','pk','name','year', 'description', 'genres', 'category']
-#         self.list_display_links = ['name']
-#         self.list_editable = ['genre']
+class GenreInline(admin.TabularInline):
+    model = GenreTitle
+    extra = 1
 
 
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'year', 'description', 'category') #'genres', 
+    list_display = ('pk', 'name', 'year', 'description','category')#,'genre') 
     search_fields = ('name',)
     list_filter = ('year',)
     empty_value_display = '-пусто-'
+    inlines = [ GenreInline, ]
+    exclude = ['genre']
 
-    # def get_changelist(self, request, **kwargs):
-    #     return TitleChangeList
 
-    # def get_changelist_form(self, request, **kwargs):
-    #     return TitleChangeListForm
+@admin.register(GenreTitle)
+class GenreTitleAdmin(admin.ModelAdmin):
+    list_display = ('genre_id', 'title_id')
+    ordering = ('-title_id',)
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
@@ -45,6 +32,15 @@ class GenreAdmin(admin.ModelAdmin):
 
 
 @admin.register(Category)
-class Categorydmin(admin.ModelAdmin):
+class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     search_fields = ('name',)
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('text', 'review_id', 'pub_date', 'author_id')
+    search_fields = ('text',)
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('title_id', 'author_id', 'text', 'score', 'pub_date')
