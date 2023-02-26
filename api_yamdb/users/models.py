@@ -30,7 +30,6 @@ class User(AbstractUser):
         default=USER,
         verbose_name='Права доступа'
     )
-    
 
     class Meta:
         ordering = ['id']
