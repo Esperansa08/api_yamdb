@@ -150,10 +150,19 @@ class ReviewCommentViewSet(viewsets.ModelViewSet):
         return Title.objects.get(pk=title_id)
 
     def get_review(self):
-        review_id = self.kwargs.get("review_id")
+        review_id = self.kwargs.get("pk")
+        print(self.kwargs)
         if not Review.objects.filter(pk=review_id).exists():
             raise TitleOrReviewNotFound
         return Review.objects.get(pk=review_id)
+
+    def get_patch_author(self):
+        if self.request.method != 'PATCH':
+            return self.request.user
+        if not (self.request.user.is_moderator()
+                or self.request.user.is_admin()):
+            return self.request.user
+        return self.get_review().author
 
 
 class ReviewViewSet(ReviewCommentViewSet):
@@ -175,7 +184,7 @@ class ReviewViewSet(ReviewCommentViewSet):
         )
 
     def perform_update(self, serializer):
-        author = self.request.user
+        author = self.get_patch_author()
         title = self.get_title()
         serializer.save(
             author=author,
@@ -201,7 +210,7 @@ class CommentViewSet(ReviewCommentViewSet):
         )
 
     def perform_update(self, serializer):
-        author = self.request.user
+        author = self.get_patch_author()
         self.get_title()
         review = self.get_review()
         serializer.save(
