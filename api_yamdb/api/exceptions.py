@@ -17,3 +17,7 @@ class IncorrectGenresInData(ValidationError):
 
 class IncorrectAuthorReview(ValidationError):
     default_detail = 'Этот автор уже оставлял отзыв к произведению'
+
+
+class IncorrectGenresInSlug(ValidationError):
+    default_detail = 'Переданы некорректные значения слага'

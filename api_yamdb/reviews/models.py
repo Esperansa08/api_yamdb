@@ -4,8 +4,14 @@ from users.models import User
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=256, verbose_name='Название жанра')
-    slug = models.SlugField(max_length=50, unique=True, verbose_name='Жанр')
+    name = models.CharField(
+        max_length=256,
+        unique=True,
+        verbose_name='Название жанра')
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name='Жанр')
 
     class Meta:
         verbose_name_plural = 'Жанры'
@@ -13,7 +19,7 @@ class Genre(models.Model):
 
     def __str__(self):
         return self.name
-
+    
 
 class Title(models.Model):
     name = models.TextField(
@@ -24,7 +30,8 @@ class Title(models.Model):
                                verbose_name='год публикации',
                                help_text='Введите год публикации произведения')
     genre = models.ManyToManyField(
-        Genre,
+        'Genre',
+        related_name='genre',
         through='GenreTitle')
     category = models.ForeignKey(
         'Category',
@@ -92,7 +99,6 @@ class Review(models.Model):
     )
     author = models.ForeignKey(
         User,
-        db_column='author',
         null=False,
         on_delete=models.CASCADE,
         verbose_name='Автор отзыва',
@@ -114,7 +120,6 @@ class Review(models.Model):
 class Comment(models.Model):
     author = models.ForeignKey(
         User,
-        db_column='author',
         null=False,
         verbose_name='Автор комментария',
         on_delete=models.CASCADE,)

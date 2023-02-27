@@ -1,7 +1,10 @@
 from django.db.models import Avg
+from django.core import validators
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework import serializers
+
+
 
 from reviews.models import Category, Comment, Genre, Title, Review
 
@@ -10,8 +13,10 @@ from api.exceptions import (BadRating)
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
-    slug = serializers.CharField()
+    name = serializers.CharField(max_length=256)
+    slug = serializers.CharField(
+        max_length=50,
+        validators=[validators.validate_slug])
 
     class Meta:
         model = Genre
@@ -95,6 +100,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         if not (value in range(1, 11)):
             raise BadRating()
         return value
+
 
     class Meta:
         model = Review
