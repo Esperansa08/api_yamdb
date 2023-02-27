@@ -1,13 +1,8 @@
-import datetime as dt
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
 from rest_framework import viewsets
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-from rest_framework.validators import UniqueTogetherValidator
-from rest_framework.validators import UniqueValidator
-
+from django.core import validators
 
 from reviews.models import Category, Comment, Genre, Title, Review
 
@@ -16,8 +11,10 @@ from api.exceptions import (BadRating)
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
-    slug = serializers.CharField()
+    name = serializers.CharField(max_length=256)
+    slug = serializers.CharField(
+        max_length=50,
+        validators=[validators.validate_slug])
 
     class Meta:
         model = Genre
@@ -96,10 +93,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         queryset=User.objects.all(),
         default=serializers.CurrentUserDefault(),
     )
-    
+
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
+
 
 class SignupSerializer(serializers.Serializer):
     username = serializers.RegexField(
@@ -123,7 +121,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'first_name',
                   'last_name', 'bio', 'role']
         model = User
-        
+
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.RegexField(
@@ -150,4 +148,3 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date',)
         read_only_fields = ('id', 'author', 'pub_date',)
-
