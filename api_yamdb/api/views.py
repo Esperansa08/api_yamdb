@@ -12,7 +12,10 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
-from api.permissions import (IsAdminOnly, IsAdminOrReadOnly)
+
+from api.permissions import (IsAdminOnly,
+                             IsAuthorModeratorAdminOrReadOnly,
+                             IsAdminOrReadOnly)
 from api.serializers import (
     GenreSerializer,
     TitleSerializerRead,
@@ -154,6 +157,7 @@ class ReviewCommentViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(ReviewCommentViewSet):
+    permission_classes = IsAuthorModeratorAdminOrReadOnly,
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
@@ -180,6 +184,7 @@ class ReviewViewSet(ReviewCommentViewSet):
 
 
 class CommentViewSet(ReviewCommentViewSet):
+    permission_classes = IsAuthorModeratorAdminOrReadOnly,
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 

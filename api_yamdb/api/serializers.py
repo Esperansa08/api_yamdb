@@ -1,8 +1,10 @@
 from django.db.models import Avg
+from django.core import validators
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework import serializers
-from django.core import validators
+
+
 
 from reviews.models import Category, Comment, Genre, Title, Review
 
@@ -94,6 +96,12 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
     )
 
+    def validate_score(self, value):
+        if not (value in range(1, 11)):
+            raise BadRating()
+        return value
+
+
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
@@ -130,11 +138,6 @@ class TokenSerializer(serializers.Serializer):
         required=True
     )
     confirmation_code = serializers.CharField(required=True)
-
-    def validate_score(self, value):
-        if not (value in range(1, 11)):
-            raise BadRating()
-        return value
 
     class Meta:
         model = Review
