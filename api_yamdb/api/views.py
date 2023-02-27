@@ -4,16 +4,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 
-from rest_framework import permissions, status, viewsets, filters
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework import status, viewsets, filters
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.serializers import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
-from api.permissions import isAdminOnly
+from api.permissions import isAdminOnly, isAuthorModeratorAdminOrReadOnly
 from api.serializers import (
     GenreSerializer,
     TitleSerializerRead,
@@ -26,6 +25,7 @@ from api.serializers import (
     UserSerializer)
 from api.exceptions import TitleOrReviewNotFound, IncorrectAuthorReview
 from reviews.models import Category, Comment, Genre, Review, Title
+
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))
@@ -45,7 +45,7 @@ def signup(request):
             {'message': 'Имя пользователя или почта уже используются.'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    confirmation_code  = default_token_generator.make_token(user)
+    confirmation_code = default_token_generator.make_token(user)
     send_mail(
         subject='Регистрация на Yamdb',
         message=f"Your confirmation code: {confirmation_code}",
@@ -94,6 +94,7 @@ def users_me(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
@@ -103,7 +104,6 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     http_method_names = ['get', 'post', 'patch', 'delete']
-
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -159,6 +159,7 @@ class ReviewCommentViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(ReviewCommentViewSet):
+    permission_classes = isAuthorModeratorAdminOrReadOnly,
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
@@ -185,6 +186,7 @@ class ReviewViewSet(ReviewCommentViewSet):
 
 
 class CommentViewSet(ReviewCommentViewSet):
+    permission_classes = isAuthorModeratorAdminOrReadOnly,
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
