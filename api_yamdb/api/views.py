@@ -154,12 +154,6 @@ class ReviewCommentViewSet(viewsets.ModelViewSet):
             raise TitleOrReviewNotFound
         return Title.objects.get(pk=title_id)
 
-    def get_review(self):
-        review_id = self.kwargs.get("review_id")
-        if not Review.objects.filter(pk=review_id).exists():
-            raise TitleOrReviewNotFound
-        return Review.objects.get(pk=review_id)
-
 
 class ReviewViewSet(ReviewCommentViewSet):
     permission_classes = IsAuthorModeratorAdminOrReadOnly,
@@ -168,7 +162,6 @@ class ReviewViewSet(ReviewCommentViewSet):
 
     def get_review(self):
         review_id = self.kwargs.get("pk")
-        # print(self.kwargs)
         if not Review.objects.filter(pk=review_id).exists():
             raise TitleOrReviewNotFound
         return Review.objects.get(pk=review_id)
@@ -207,6 +200,13 @@ class CommentViewSet(ReviewCommentViewSet):
     permission_classes = IsAuthorModeratorAdminOrReadOnly,
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def get_review(self):
+        review_id = self.kwargs.get("review_id")
+        print(self.kwargs)
+        if not Review.objects.filter(pk=review_id).exists():
+            raise TitleOrReviewNotFound
+        return Review.objects.get(pk=review_id)
 
     def get_queryset(self):
         return self.get_review().comments.all()
