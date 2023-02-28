@@ -19,7 +19,7 @@ class Genre(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 
 class Title(models.Model):
     name = models.TextField(
@@ -111,10 +111,15 @@ class Review(models.Model):
     )
 
     class Meta:
-        unique_together = ('title', 'author',)
         ordering = ('-pub_date',)
         verbose_name_plural = 'Отзывов'
         verbose_name = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='Возможен только один отзыв на произведение'
+            )
+        ]
 
 
 class Comment(models.Model):

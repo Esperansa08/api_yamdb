@@ -149,17 +149,18 @@ class ReviewCommentViewSet(viewsets.ModelViewSet):
             raise TitleOrReviewNotFound
         return Title.objects.get(pk=title_id)
 
-    def get_review(self):
-        review_id = self.kwargs.get("review_id")
-        if not Review.objects.filter(pk=review_id).exists():
-            raise TitleOrReviewNotFound
-        return Review.objects.get(pk=review_id)
-
 
 class ReviewViewSet(ReviewCommentViewSet):
     permission_classes = IsAuthorModeratorAdminOrReadOnly,
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    def get_review(self):
+        review_id = self.kwargs.get("pk")
+        print(self.kwargs)
+        if not Review.objects.filter(pk=review_id).exists():
+            raise TitleOrReviewNotFound
+        return Review.objects.get(pk=review_id)
 
     def get_queryset(self):
         return self.get_title().reviews.all()
@@ -174,8 +175,16 @@ class ReviewViewSet(ReviewCommentViewSet):
             title=title
         )
 
+    def get_patch_author(self):
+        if self.request.method != 'PATCH':
+            return self.request.user
+        if not (self.request.user.is_moderator()
+                or self.request.user.is_admin()):
+            return self.request.user
+        return self.get_review().author
+
     def perform_update(self, serializer):
-        author = self.request.user
+        author = self.get_patch_author()
         title = self.get_title()
         serializer.save(
             author=author,
@@ -187,6 +196,13 @@ class CommentViewSet(ReviewCommentViewSet):
     permission_classes = IsAuthorModeratorAdminOrReadOnly,
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def get_review(self):
+        review_id = self.kwargs.get("review_id")
+        print(self.kwargs)
+        if not Review.objects.filter(pk=review_id).exists():
+            raise TitleOrReviewNotFound
+        return Review.objects.get(pk=review_id)
 
     def get_queryset(self):
         return self.get_review().comments.all()
