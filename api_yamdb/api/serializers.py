@@ -3,8 +3,7 @@ from django.core import validators
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework import serializers
-
-
+from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Title, Review
 
@@ -16,11 +15,13 @@ class GenreSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=256)
     slug = serializers.CharField(
         max_length=50,
-        validators=[validators.validate_slug])
+        validators=[validators.validate_slug,
+                    UniqueValidator(queryset=Genre.objects.all())])
 
     class Meta:
         model = Genre
         fields = ('name', 'slug')
+        lookup_field = 'slug'
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -72,7 +73,6 @@ class TitleSerializerWrite(serializers.ModelSerializer):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    # permission_classes = [IsAdminOrReadOnly, ]
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -100,7 +100,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         if not (value in range(1, 11)):
             raise BadRating()
         return value
-
 
     class Meta:
         model = Review
