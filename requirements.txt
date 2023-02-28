@@ -8,7 +8,7 @@ Django==3.2
 django-dotenv==1.4.2
 django-filter==22.1
 djangorestframework==3.12.4
-djangorestframework-simplejwt
+djangorestframework-simplejwt==4.7.2
 flake8==6.0.0
 flake8-import-order==0.18.2
 idna==3.4
