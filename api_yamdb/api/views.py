@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
-
+from rest_framework import mixins
 from rest_framework import status, viewsets, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
-
+from api.filters import TitleFilter
 from api.permissions import (IsAdminOnly,
                              IsAuthorModeratorAdminOrReadOnly,
                              IsAdminOrReadOnly)
@@ -113,9 +113,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = (TitleSerializerRead, TitleSerializerWrite)
+    filterset_class = TitleFilter
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year', 'category')  # ,'genre')
+    filterset_fields = ('name', 'year', 'category', 'genre__slug')
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -123,7 +124,9 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializerWrite
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(mixins.ListModelMixin,
+                   mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                   viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = GenreSerializer
@@ -133,7 +136,9 @@ class GenreViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Category.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = CategorySerializer
@@ -157,7 +162,6 @@ class ReviewViewSet(ReviewCommentViewSet):
 
     def get_review(self):
         review_id = self.kwargs.get("pk")
-        print(self.kwargs)
         if not Review.objects.filter(pk=review_id).exists():
             raise TitleOrReviewNotFound
         return Review.objects.get(pk=review_id)

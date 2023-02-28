@@ -5,8 +5,8 @@ from reviews.models import Category, Comment, Genre, Title, Review, GenreTitle
 
 from users.models import User
 
-message = 'Модель существует'
-success_message = 'Успешно'
+message = 'Данные успешно загружены в табл.'
+success_message = 'Все данные успешно загружены'
 
 
 class Command(BaseCommand):
@@ -80,12 +80,12 @@ class Command(BaseCommand):
 
         for func, model, file in self.ACTIONS:
             if model.objects.exists():
-                print(message)
+                print('Таблица', {model.__name__}, 'уже содержит данные.')
 
             for row in DictReader(
                 open(
                     f'static/data/{file}',
                     encoding='utf8')):
                 func(row)
-
+            print(message, {model.__name__})
         print(success_message)

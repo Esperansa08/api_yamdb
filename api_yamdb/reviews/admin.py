@@ -1,13 +1,17 @@
 from django.contrib import admin
 
-from reviews.models import (Title, Genre, Category, Comment, Review)
-#GenreTitle, 
+from reviews.models import (
+    Title,
+    Genre,
+    Category,
+    Comment,
+    Review,
+    GenreTitle)
 
 
-
-# class GenreInline(admin.TabularInline):
-#     model = GenreTitle
-#     extra = 1
+class GenreInline(admin.TabularInline):
+    model = GenreTitle
+    extra = 1
 
 
 @admin.register(Title)
@@ -21,14 +25,14 @@ class TitleAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = ('year',)
     empty_value_display = '-пусто-'
-    #inlines = [GenreInline, ]
+    # inlines = [GenreInline, ]
     exclude = ['genre']
 
 
-# @admin.register(GenreTitle)
-# class GenreTitleAdmin(admin.ModelAdmin):
-#     list_display = ('genre_id', 'title_id')
-#     ordering = ('-title_id',)
+@admin.register(GenreTitle)
+class GenreTitleAdmin(admin.ModelAdmin):
+    list_display = ('genre_id', 'title_id')
+    ordering = ('-title_id',)
 
 
 @admin.register(Genre)

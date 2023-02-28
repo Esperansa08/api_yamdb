@@ -11,6 +11,7 @@ class Genre(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        default='dsffsd',
         verbose_name='Жанр')
 
     class Meta:
@@ -31,7 +32,7 @@ class Title(models.Model):
                                help_text='Введите год публикации произведения')
     genre = models.ManyToManyField(
         'Genre',
-        related_name='genre',
+        related_name='genres',
         through='GenreTitle')
     category = models.ForeignKey(
         'Category',
