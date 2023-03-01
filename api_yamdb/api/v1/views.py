@@ -1,34 +1,25 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
-from rest_framework import mixins
-from rest_framework import status, viewsets, filters
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .filters import TitleFilter
-from .permissions import (IsAdminOnly,
-                          IsAuthorModeratorAdminOrReadOnly,
-                          IsAdminOrReadOnly)
-from .serializers import (
-    GenreSerializer,
-    TitleSerializerRead,
-    TitleSerializerWrite,
-    CategorySerializer,
-    SignupSerializer,
-    TokenSerializer,
-    ReviewSerializer,
-    CommentSerializer,
-    UserSerializer)
-from .exceptions import (TitleOrReviewNotFound,
-                         IncorrectAuthorReview)
 from reviews.models import Category, Comment, Genre, Review, Title
+from .exceptions import IncorrectAuthorReview, TitleOrReviewNotFound
+from .filters import TitleFilter
+from .permissions import (IsAdminOnly, IsAdminOrReadOnly,
+                          IsAuthorModeratorAdminOrReadOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, SignupSerializer,
+                          TitleSerializerRead, TitleSerializerWrite,
+                          TokenSerializer, UserSerializer)
 
 User = get_user_model()
 
