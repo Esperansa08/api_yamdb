@@ -123,7 +123,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializerWrite
 
 
-
 class GenreViewSet(mixins.ListModelMixin,
                    mixins.CreateModelMixin, mixins.DestroyModelMixin,
                    viewsets.GenericViewSet):

@@ -1,9 +1,7 @@
 import datetime as dt
 from django.contrib.auth import get_user_model
 from django.core import validators
-from django.db.models import Avg
-from django.shortcuts import get_object_or_404
-from rest_framework import serializers, viewsets
+from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -63,7 +61,8 @@ class TitleSerializerWrite(serializers.ModelSerializer):
         print(year_now)
         if value > year_now:
             raise IncorrectTitleInYear('Передано некорректное значение года')
-        return value 
+        return value
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
