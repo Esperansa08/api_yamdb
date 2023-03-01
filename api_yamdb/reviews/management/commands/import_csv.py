@@ -1,5 +1,3 @@
-import logging
-import sys
 from csv import DictReader
 from django.core.management.base import BaseCommand
 
@@ -87,4 +85,3 @@ class Command(BaseCommand):
                 func(row)
             print(MESSAGE, {model.__name__})
         print(SUCCESS_MESSAGE)
-

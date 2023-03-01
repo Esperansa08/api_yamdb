@@ -12,6 +12,7 @@ class TitleFilter(FilterSet):
     name = CharFilterInFilter(
         field_name='name',
         lookup_expr='in',)
+
     class Meta:
         model = Title
         fields = ('genre', 'category', 'year', 'name',)
