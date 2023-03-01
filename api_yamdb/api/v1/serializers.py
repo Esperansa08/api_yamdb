@@ -100,7 +100,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate_score(self, value):
         if not (value in range(1, 11)):
-            raise BadRating()
+            raise BadRating('Оценка должна быть в пределах от 1 до 10')
         return value
 
     class Meta:
