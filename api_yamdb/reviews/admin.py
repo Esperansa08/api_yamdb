@@ -21,11 +21,10 @@ class TitleAdmin(admin.ModelAdmin):
         'name',
         'year',
         'description',
-        'category')  # ,'genre')
+        'category')
     search_fields = ('name',)
     list_filter = ('year',)
     empty_value_display = '-пусто-'
-    # inlines = [GenreInline, ]
     exclude = ['genre']
 
 

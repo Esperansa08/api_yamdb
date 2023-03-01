@@ -119,16 +119,16 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year', 'category', 'genre__slug')
 
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return TitleSerializerRead
-        return TitleSerializerWrite
+    def get_serializer_class(self): 
+        if self.request.method == 'GET': 
+            return TitleSerializerRead 
+        return TitleSerializerWrite 
 
 
 class GenreViewSet(mixins.ListModelMixin,
-                   mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                   mixins.CreateModelMixin, 
+                   mixins.DestroyModelMixin,
                    viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
@@ -206,7 +206,6 @@ class CommentViewSet(ReviewCommentViewSet):
 
     def get_review(self):
         review_id = self.kwargs.get("review_id")
-        print(self.kwargs)
         if not Review.objects.filter(pk=review_id).exists():
             raise TitleOrReviewNotFound
         return Review.objects.get(pk=review_id)

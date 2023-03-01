@@ -1,3 +1,4 @@
+import datetime as dt
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.core import validators
@@ -8,7 +9,7 @@ from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Title, Review
 
-from .exceptions import (BadRating)
+from .exceptions import (BadRating, IncorrectTitleInYear)
 
 User = get_user_model()
 
@@ -41,13 +42,13 @@ class TitleSerializerRead(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ['id', 'name', 'year', 'rating', 'description', 'genre',
-                  'category']
+        fields = ('id', 'name', 'year', 'rating', 'description', 'genre',
+                  'category')
 
     def get_rating(self, obj):
         return Review.objects.filter(
             title=obj).aggregate(Avg('score'))['score__avg']
-
+    
 
 class TitleSerializerWrite(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(slug_field='slug',
@@ -60,35 +61,19 @@ class TitleSerializerWrite(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ['id', 'name', 'year', 'rating', 'description', 'genre',
-                  'category']
+        fields = ('id', 'name', 'year', 'rating', 'description', 'genre',
+                  'category')
 
     def get_rating(self, obj):
         return Review.objects.filter(
             title=obj).aggregate(Avg('score'))['score__avg']
-
-    def to_representation(self, instance):
-        request = self.context.get('request')
-        context = {'request': request}
-        return TitleSerializerRead(instance, context=context).data
-
-
-class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
-
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return TitleSerializerRead
-        return TitleSerializerWrite
-
-    def perform_create(self, serializer):
-        category_slug = self.request.data['category']
-        genre = self.request.data['genre']
-        category = get_object_or_404(Category, slug=category_slug)
-        genres = []
-        for item in genre:
-            genres.append(get_object_or_404(Genre, slug=item))
-        serializer.save(category=category, genres=genres)
+    
+    def validate_year(self, value):
+        year_now = dt.date.today().year
+        print(year_now)
+        if value > year_now:
+            raise IncorrectTitleInYear('Передано некорректное значение года')
+        return value 
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -127,8 +112,8 @@ class SignupSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ['username', 'email', 'first_name',
-                  'last_name', 'bio', 'role']
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
         model = User
 
 

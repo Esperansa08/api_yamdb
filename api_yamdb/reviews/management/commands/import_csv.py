@@ -1,12 +1,13 @@
+import logging
+import sys
 from csv import DictReader
 from django.core.management.base import BaseCommand
 
 from reviews.models import Category, Comment, Genre, Title, Review, GenreTitle
-
 from users.models import User
 
-message = 'Данные успешно загружены в табл.'
-success_message = 'Все данные успешно загружены'
+MESSAGE = 'Данные успешно загружены в табл.'
+SUCCESS_MESSAGE = 'Все данные успешно загружены'
 
 
 class Command(BaseCommand):
@@ -75,17 +76,15 @@ class Command(BaseCommand):
     ]
 
     def handle(self, *args, **options):
-
         print('Загрузка данных из csv в базу:')
-
         for func, model, file in self.ACTIONS:
             if model.objects.exists():
                 print('Таблица', {model.__name__}, 'уже содержит данные.')
-
             for row in DictReader(
                 open(
                     f'static/data/{file}',
                     encoding='utf8')):
                 func(row)
-            print(message, {model.__name__})
-        print(success_message)
+            print(MESSAGE, {model.__name__})
+        print(SUCCESS_MESSAGE)
+

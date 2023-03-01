@@ -21,3 +21,7 @@ class IncorrectAuthorReview(ValidationError):
 
 class IncorrectGenresInSlug(ValidationError):
     default_detail = 'Переданы некорректные значения слага'
+
+
+class IncorrectTitleInYear(ValidationError):
+    """Exception raised when user tries to add incorrect year value"""
