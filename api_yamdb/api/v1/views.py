@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from django.db.models import Avg, OuterRef
 from rest_framework import mixins
 from rest_framework import status, viewsets, filters
 from rest_framework.decorators import api_view, permission_classes
@@ -120,6 +121,13 @@ class TitleViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year', 'category', 'genre__slug')
+
+    def get_queryset(self):
+        return Title.objects.annotate(
+            rating=Review.objects.filter(
+                title=OuterRef('pk')).values(
+                    'title_id').annotate(Avg('score')).values('score__avg')
+        )
 
     def get_serializer_class(self):
         if self.action == 'list':
