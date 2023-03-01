@@ -1,13 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.core import validators
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from rest_framework import serializers
+from rest_framework import serializers, viewsets
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import Category, Comment, Genre, Title, Review
-
-from .exceptions import (BadRating)
+from reviews.models import Category, Comment, Genre, Review, Title
+from .exceptions import BadRating
 
 User = get_user_model()
 

@@ -1,5 +1,6 @@
-from reviews.models import Title
 from django_filters.rest_framework import BaseInFilter, CharFilter, FilterSet
+
+from reviews.models import Title
 
 
 class CharFilterInFilter(BaseInFilter, CharFilter):
