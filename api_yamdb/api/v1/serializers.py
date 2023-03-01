@@ -35,16 +35,12 @@ class CategorySerializer(serializers.ModelSerializer):
 class TitleSerializerRead(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(many=True, required=False)
-    rating = serializers.SerializerMethodField(read_only=True)
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
         fields = ['id', 'name', 'year', 'rating', 'description', 'genre',
                   'category']
-
-    def get_rating(self, obj):
-        return Review.objects.filter(
-            title=obj).aggregate(Avg('score'))['score__avg']
 
 
 class TitleSerializerWrite(serializers.ModelSerializer):
@@ -54,16 +50,12 @@ class TitleSerializerWrite(serializers.ModelSerializer):
                                          slug_field='slug',
                                          queryset=Genre.objects.all())
 
-    rating = serializers.SerializerMethodField(read_only=True)
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
         fields = ['id', 'name', 'year', 'rating', 'description', 'genre',
                   'category']
-
-    def get_rating(self, obj):
-        return Review.objects.filter(
-            title=obj).aggregate(Avg('score'))['score__avg']
 
     def to_representation(self, instance):
         request = self.context.get('request')
