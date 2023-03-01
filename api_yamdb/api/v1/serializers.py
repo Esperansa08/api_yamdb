@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.core import validators
 from django.shortcuts import get_object_or_404
@@ -7,8 +8,9 @@ from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Title, Review
 
-from users.models import User
-from api.exceptions import (BadRating)
+from .exceptions import (BadRating)
+
+User = get_user_model()
 
 
 class GenreSerializer(serializers.ModelSerializer):
