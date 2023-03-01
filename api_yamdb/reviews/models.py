@@ -12,7 +12,6 @@ class Genre(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        default='dsffsd',
         verbose_name='Жанр')
 
     class Meta:
@@ -28,8 +27,7 @@ class Title(models.Model):
         max_length=256,
         verbose_name='название произведения',
         help_text='Введите название произведения')
-    year = models.IntegerField(default=2023,
-                               verbose_name='год публикации',
+    year = models.IntegerField(verbose_name='год публикации',
                                help_text='Введите год публикации произведения')
     genre = models.ManyToManyField(
         'Genre',
@@ -83,7 +81,7 @@ class GenreTitle(models.Model):
         verbose_name_plural = 'Жанр-произведение'
 
     def __str__(self):
-        return f'{self.title} {self.genre}'
+        return f'{self.title_id} {self.genre_id}'
 
 
 class Review(models.Model):
@@ -113,7 +111,7 @@ class Review(models.Model):
     )
 
     class Meta:
-        ordering = ('-pub_date',)
+        # ordering = ('-pub_date',)
         verbose_name_plural = 'Отзывов'
         verbose_name = 'Отзывы'
         constraints = [
