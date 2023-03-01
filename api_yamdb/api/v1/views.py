@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
+from django.db.models import Avg, OuterRef
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -108,12 +109,19 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year', 'category', 'genre__slug')
+
+    def get_queryset(self):
+        return Title.objects.annotate(
+            rating=Review.objects.filter(
+                title=OuterRef('pk')).values(
+                    'title_id').annotate(Avg('score')).values('score__avg')
+        )
 
     def get_serializer_class(self):
-        if self.action == 'list':
+        if self.request.method == 'GET':
             return TitleSerializerRead
         return TitleSerializerWrite
+
 
 
 class GenreViewSet(mixins.ListModelMixin,
@@ -202,7 +210,6 @@ class CommentViewSet(ReviewCommentViewSet):
 
     def get_review(self):
         review_id = self.kwargs.get("review_id")
-        print(self.kwargs)
         if not Review.objects.filter(pk=review_id).exists():
             raise TitleOrReviewNotFound(
                 detail='Не найдено произведение или отзыв',
