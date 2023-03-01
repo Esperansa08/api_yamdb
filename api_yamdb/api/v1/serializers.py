@@ -115,7 +115,7 @@ class SignupSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, max_length=254)
 
     def validate_username(self, value):
-        if value == 'me':
+        if value.lower() == 'me':
             raise serializers.ValidationError(
                 'Имя пользователя "me" не допустимо!'
             )
@@ -140,7 +140,7 @@ class TokenSerializer(serializers.Serializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        fields = ('username', 'confirmation_code')
 
 
 class CommentSerializer(serializers.ModelSerializer):

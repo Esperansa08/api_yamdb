@@ -5,11 +5,11 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from .exceptions import IncorrectAuthorReview, TitleOrReviewNotFound
@@ -66,30 +66,8 @@ def token(request):
         return Response(
             'Неверный код подтверждения', status=status.HTTP_400_BAD_REQUEST
         )
-    refresh = str(RefreshToken.for_user(user).access_token)
-    return Response(
-        {"token": refresh},
-        status=status.HTTP_200_OK)
-
-
-@api_view(['GET', 'PATCH'])
-@permission_classes((IsAuthenticated,))
-def users_me(request):
-    """Получаем и обновляем свои данные"""
-    user = request.user
-    if request.method == "GET":
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    if request.method == "PATCH":
-        serializer = UserSerializer(
-            user,
-            data=request.data,
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save(role=user.role)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    token = AccessToken.for_user(user)
+    return Response({'token': str(token)}, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -101,6 +79,26 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     http_method_names = ['get', 'post', 'patch', 'delete']
+
+    @action(
+        detail=False,
+        methods=['GET', 'PATCH'],
+        permission_classes=(IsAuthenticated,)
+    )
+    def me(self, request):
+        """Получаем и обновляем свои данные"""
+        user = request.user
+        if request.method == 'PATCH':
+            serializer = UserSerializer(
+                user,
+                data=request.data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(role=user.role)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
