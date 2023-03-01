@@ -1,23 +1,14 @@
-from rest_framework import status
-from rest_framework.serializers import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 
 
-class TitleOrReviewNotFound(ValidationError):
-    status_code = status.HTTP_404_NOT_FOUND
-    default_detail = 'Не найдено произведение или отзыв'
+class TitleOrReviewNotFound(NotFound):
+    """Exception raised when Title or Review ID url did not match any object"""
 
 
 class BadRating(ValidationError):
-    default_detail = 'Оценка должна быть в пределах от 1 до 10'
-
-
-class IncorrectGenresInData(ValidationError):
-    default_detail = 'Переданы некорректные значения жанров'
+    """Exception raised when app got title rating not in range(1,11)"""
 
 
 class IncorrectAuthorReview(ValidationError):
-    default_detail = 'Этот автор уже оставлял отзыв к произведению'
-
-
-class IncorrectGenresInSlug(ValidationError):
-    default_detail = 'Переданы некорректные значения слага'
+    """Exception raised when user tries to add
+    more than one review to title"""

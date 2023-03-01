@@ -154,7 +154,10 @@ class ReviewCommentViewSet(viewsets.ModelViewSet):
     def get_title(self):
         title_id = self.kwargs.get("title_id")
         if not Title.objects.filter(pk=title_id).exists():
-            raise TitleOrReviewNotFound
+            raise TitleOrReviewNotFound(
+                detail='Не найдено произведение или отзыв',
+                code=status.HTTP_404_NOT_FOUND
+            )
         return Title.objects.get(pk=title_id)
 
 
@@ -166,7 +169,10 @@ class ReviewViewSet(ReviewCommentViewSet):
     def get_review(self):
         review_id = self.kwargs.get("pk")
         if not Review.objects.filter(pk=review_id).exists():
-            raise TitleOrReviewNotFound
+            raise TitleOrReviewNotFound(
+                detail='Не найдено произведение или отзыв',
+                code=status.HTTP_404_NOT_FOUND
+            )
         return Review.objects.get(pk=review_id)
 
     def get_queryset(self):
@@ -176,7 +182,8 @@ class ReviewViewSet(ReviewCommentViewSet):
         author = self.request.user
         title = self.get_title()
         if title.reviews.filter(author=author).exists():
-            raise IncorrectAuthorReview()
+            raise IncorrectAuthorReview(
+                'Этот автор уже оставлял отзыв к произведению')
         serializer.save(
             author=author,
             title=title
@@ -208,7 +215,10 @@ class CommentViewSet(ReviewCommentViewSet):
         review_id = self.kwargs.get("review_id")
         print(self.kwargs)
         if not Review.objects.filter(pk=review_id).exists():
-            raise TitleOrReviewNotFound
+            raise TitleOrReviewNotFound(
+                detail='Не найдено произведение или отзыв',
+                code=status.HTTP_404_NOT_FOUND
+            )
         return Review.objects.get(pk=review_id)
 
     def get_queryset(self):
