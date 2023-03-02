@@ -1,5 +1,4 @@
 import logging
-import sys
 from csv import DictReader
 from django.core.management.base import BaseCommand
 
@@ -86,8 +85,7 @@ class Command(BaseCommand):
         logging.info('Загрузка данных из csv в базу:')
         for func, model, file in self.ACTIONS:
             if model.objects.exists():
-                print('Таблица', {model.__name__}, 'уже содержит данные.')
-                logging.info(f'Таблица', {model.__name__}, 'уже содержит данные.')
+                logging.info('Таблица уже содержит данные.')
             for row in DictReader(
                 open(
                     f'static/data/{file}',
