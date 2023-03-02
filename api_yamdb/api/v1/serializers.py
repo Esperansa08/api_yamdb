@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title
-from .exceptions import BadRating, IncorrectTitleInYear
+from .exceptions import IncorrectTitleInYear, IncorrectAuthorReview
 
 User = get_user_model()
 
@@ -71,9 +71,12 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
     )
 
-    def validate_score(self, value):
-        if not (value in range(1, 11)):
-            raise BadRating('Оценка должна быть в пределах от 1 до 10')
+    def validate_author(self, value):
+        author = self.context['request'].user
+        title = self.context['view'].get_title()
+        if title.reviews.filter(author=author).exists():
+            raise IncorrectAuthorReview(
+                'Этот автор уже оставлял отзыв к произведению')
         return value
 
     class Meta:
