@@ -1,17 +1,11 @@
 from reviews.models import Title
-from django_filters.rest_framework import BaseInFilter, CharFilter, FilterSet
-
-
-class CharFilterInFilter(BaseInFilter, CharFilter):
-    pass
+from django_filters.rest_framework import CharFilter, FilterSet
 
 
 class TitleFilter(FilterSet):
-    genre = CharFilterInFilter(field_name='genre__slug', )
-    category = CharFilterInFilter(field_name='category__slug',)
-    name = CharFilterInFilter(
-        field_name='name',
-        lookup_expr='in',)
+    genre = CharFilter(field_name='genre__slug')
+    category = CharFilter(field_name='category__slug')
+    name = CharFilter(field_name='name', lookup_expr='icontains')
 
     class Meta:
         model = Title
