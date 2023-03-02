@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Comment, Genre, Review, Title
-from .exceptions import IncorrectAuthorReview
 from .filters import TitleFilter
 from .permissions import (IsAdminOnly, IsAdminOrReadOnly,
                           IsAuthorModeratorAdminOrReadOnly)
@@ -163,9 +162,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         author = self.request.user
         title = self.get_title()
-        if title.reviews.filter(author=author).exists():
-            raise IncorrectAuthorReview(
-                'Этот автор уже оставлял отзыв к произведению')
         serializer.save(
             author=author,
             title=title
@@ -193,9 +189,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
-    def get_title(self):
-        return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs.get("review_id"))
 
@@ -204,7 +197,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         author = self.request.user
-        self.get_title()
         review = self.get_review()
         serializer.save(
             author=author,
@@ -213,7 +205,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         author = self.request.user
-        self.get_title()
         review = self.get_review()
         serializer.save(
             author=author,
