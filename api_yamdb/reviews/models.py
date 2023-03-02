@@ -89,7 +89,6 @@ class Review(models.Model):
         Title,
         related_name='reviews',
         blank=False,
-        null=False,
         on_delete=models.CASCADE,
         verbose_name='Отзыв на произведение',
     )
@@ -99,7 +98,6 @@ class Review(models.Model):
     )
     author = models.ForeignKey(
         User,
-        null=False,
         on_delete=models.CASCADE,
         verbose_name='Автор отзыва',
     )
@@ -125,13 +123,11 @@ class Review(models.Model):
 class Comment(models.Model):
     author = models.ForeignKey(
         User,
-        null=False,
         verbose_name='Автор комментария',
         on_delete=models.CASCADE,)
     review = models.ForeignKey(
         Review,
         related_name='comments',
-        null=False,
         verbose_name='Комментируемый отзыв',
         on_delete=models.CASCADE)
     text = models.TextField()
