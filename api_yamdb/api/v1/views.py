@@ -150,6 +150,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
+    def get_patch_author(self):
+        if self.request.method != 'PATCH':
+            return self.request.user
+        if not (self.request.user.is_moderator
+                or self.request.user.is_admin):
+            return self.request.user
+        return self.get_review().author
+
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
 
@@ -166,14 +174,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=author,
             title=title
         )
-
-    def get_patch_author(self):
-        if self.request.method != 'PATCH':
-            return self.request.user
-        if not (self.request.user.is_moderator
-                or self.request.user.is_admin):
-            return self.request.user
-        return self.get_review().author
 
 
 class CommentViewSet(viewsets.ModelViewSet):
