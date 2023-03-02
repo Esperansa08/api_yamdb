@@ -146,7 +146,11 @@ class CategoryViewSet(mixins.ListModelMixin,
     lookup_field = 'slug'
 
 
-class ReviewCommentViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(viewsets.ModelViewSet):
+    permission_classes = IsAuthorModeratorAdminOrReadOnly,
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
     def get_title(self):
         title_id = self.kwargs.get("title_id")
         if not Title.objects.filter(pk=title_id).exists():
@@ -155,12 +159,6 @@ class ReviewCommentViewSet(viewsets.ModelViewSet):
                 code=status.HTTP_404_NOT_FOUND
             )
         return Title.objects.get(pk=title_id)
-
-
-class ReviewViewSet(ReviewCommentViewSet):
-    permission_classes = IsAuthorModeratorAdminOrReadOnly,
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
 
     def get_review(self):
         review_id = self.kwargs.get("pk")
@@ -202,10 +200,19 @@ class ReviewViewSet(ReviewCommentViewSet):
         )
 
 
-class CommentViewSet(ReviewCommentViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = IsAuthorModeratorAdminOrReadOnly,
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def get_title(self):
+        title_id = self.kwargs.get("title_id")
+        if not Title.objects.filter(pk=title_id).exists():
+            raise TitleOrReviewNotFound(
+                detail='Не найдено произведение или отзыв',
+                code=status.HTTP_404_NOT_FOUND
+            )
+        return Title.objects.get(pk=title_id)
 
     def get_review(self):
         review_id = self.kwargs.get("review_id")
