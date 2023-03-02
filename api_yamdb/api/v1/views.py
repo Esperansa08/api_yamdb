@@ -160,7 +160,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        author = self.request.user
+        author = self.get_patch_author()
         title = self.get_title()
         serializer.save(
             author=author,
@@ -175,36 +175,30 @@ class ReviewViewSet(viewsets.ModelViewSet):
             return self.request.user
         return self.get_review().author
 
-    def perform_update(self, serializer):
-        author = self.get_patch_author()
-        title = self.get_title()
-        serializer.save(
-            author=author,
-            title=title
-        )
-
 
 class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = IsAuthorModeratorAdminOrReadOnly,
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
+    def get_patch_author(self):
+        if self.request.method != 'PATCH':
+            return self.request.user
+        if not (self.request.user.is_moderator
+                or self.request.user.is_admin):
+            return self.request.user
+        return self.get_review().author
+
     def get_review(self):
-        return get_object_or_404(Review, pk=self.kwargs.get("review_id"))
+        return get_object_or_404(Review,
+                                 pk=self.kwargs.get("review_id"),
+                                 title=self.kwargs.get("title_id"))
 
     def get_queryset(self):
         return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        author = self.request.user
-        review = self.get_review()
-        serializer.save(
-            author=author,
-            review=review
-        )
-
-    def perform_update(self, serializer):
-        author = self.request.user
+        author = self.get_patch_author()
         review = self.get_review()
         serializer.save(
             author=author,
