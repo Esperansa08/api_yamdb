@@ -1,12 +1,6 @@
 from django.contrib import admin
 
-from reviews.models import (
-    Title,
-    Genre,
-    Category,
-    Comment,
-    Review,
-    GenreTitle)
+from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 
 
 class GenreInline(admin.TabularInline):
@@ -21,11 +15,10 @@ class TitleAdmin(admin.ModelAdmin):
         'name',
         'year',
         'description',
-        'category')  # ,'genre')
+        'category')
     search_fields = ('name',)
     list_filter = ('year',)
     empty_value_display = '-пусто-'
-    # inlines = [GenreInline, ]
     exclude = ['genre']
 
 
