@@ -1,8 +1,4 @@
-from rest_framework.exceptions import NotFound, ValidationError
-
-
-class TitleOrReviewNotFound(NotFound):
-    """Exception raised when Title or Review ID url did not match any object"""
+from rest_framework.exceptions import ValidationError
 
 
 class IncorrectAuthorReview(ValidationError):

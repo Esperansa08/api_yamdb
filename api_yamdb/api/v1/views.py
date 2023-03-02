@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Comment, Genre, Review, Title
-from .exceptions import IncorrectAuthorReview, TitleOrReviewNotFound
+from .exceptions import IncorrectAuthorReview
 from .filters import TitleFilter
 from .permissions import (IsAdminOnly, IsAdminOrReadOnly,
                           IsAuthorModeratorAdminOrReadOnly)
@@ -152,22 +152,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
     def get_title(self):
-        title_id = self.kwargs.get("title_id")
-        if not Title.objects.filter(pk=title_id).exists():
-            raise TitleOrReviewNotFound(
-                detail='Не найдено произведение или отзыв',
-                code=status.HTTP_404_NOT_FOUND
-            )
-        return Title.objects.get(pk=title_id)
+        return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
 
     def get_review(self):
-        review_id = self.kwargs.get("pk")
-        if not Review.objects.filter(pk=review_id).exists():
-            raise TitleOrReviewNotFound(
-                detail='Не найдено произведение или отзыв',
-                code=status.HTTP_404_NOT_FOUND
-            )
-        return Review.objects.get(pk=review_id)
+        return get_object_or_404(Review, pk=self.kwargs.get("pk"))
 
     def get_queryset(self):
         return self.get_title().reviews.all()
@@ -206,22 +194,10 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_title(self):
-        title_id = self.kwargs.get("title_id")
-        if not Title.objects.filter(pk=title_id).exists():
-            raise TitleOrReviewNotFound(
-                detail='Не найдено произведение или отзыв',
-                code=status.HTTP_404_NOT_FOUND
-            )
-        return Title.objects.get(pk=title_id)
+        return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
 
     def get_review(self):
-        review_id = self.kwargs.get("review_id")
-        if not Review.objects.filter(pk=review_id).exists():
-            raise TitleOrReviewNotFound(
-                detail='Не найдено произведение или отзыв',
-                code=status.HTTP_404_NOT_FOUND
-            )
-        return Review.objects.get(pk=review_id)
+        return get_object_or_404(Review, pk=self.kwargs.get("review_id"))
 
     def get_queryset(self):
         return self.get_review().comments.all()
