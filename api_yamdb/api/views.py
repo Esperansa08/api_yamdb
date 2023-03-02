@@ -1,27 +1,33 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.db import IntegrityError
-from django.db.models import Avg, OuterRef
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import action, api_view, permission_classes
+from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
+from rest_framework import mixins
+from rest_framework import status, viewsets, filters
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
 
+from users.models import User
+from api.filters import TitleFilter
+from api.permissions import (IsAdminOnly,
+                             IsAuthorModeratorAdminOrReadOnly,
+                             IsAdminOrReadOnly)
+from api.serializers import (
+    GenreSerializer,
+    TitleSerializerRead,
+    TitleSerializerWrite,
+    CategorySerializer,
+    SignupSerializer,
+    TokenSerializer,
+    ReviewSerializer,
+    CommentSerializer,
+    UserSerializer)
+from api.exceptions import (TitleOrReviewNotFound, IncorrectAuthorReview)
 from reviews.models import Category, Comment, Genre, Review, Title
-from .filters import TitleFilter
-from .permissions import (IsAdminOnly, IsAdminOrReadOnly,
-                          IsAuthorModeratorAdminOrReadOnly)
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReviewSerializer, SignupSerializer,
-                          TitleSerializerRead, TitleSerializerWrite,
-                          TokenSerializer, UserSerializer)
-
-User = get_user_model()
 
 
 @api_view(['POST'])
@@ -66,8 +72,30 @@ def token(request):
         return Response(
             'Неверный код подтверждения', status=status.HTTP_400_BAD_REQUEST
         )
-    token = AccessToken.for_user(user)
-    return Response({'token': str(token)}, status=status.HTTP_200_OK)
+    refresh = str(RefreshToken.for_user(user).access_token)
+    return Response(
+        {"token": refresh},
+        status=status.HTTP_200_OK)
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes((IsAuthenticated,))
+def users_me(request):
+    """Получаем и обновляем свои данные"""
+    user = request.user
+    if request.method == "GET":
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    if request.method == "PATCH":
+        serializer = UserSerializer(
+            user,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=user.role)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -80,26 +108,6 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ('username',)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-    @action(
-        detail=False,
-        methods=['GET', 'PATCH'],
-        permission_classes=(IsAuthenticated,)
-    )
-    def me(self, request):
-        """Получаем и обновляем свои данные"""
-        user = request.user
-        if request.method == 'PATCH':
-            serializer = UserSerializer(
-                user,
-                data=request.data,
-                partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save(role=user.role)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
@@ -108,13 +116,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-
-    def get_queryset(self):
-        return Title.objects.annotate(
-            rating=Review.objects.filter(
-                title=OuterRef('pk')).values(
-                    'title_id').annotate(Avg('score')).values('score__avg')
-        )
+    filterset_fields = ('name', 'year', 'category', 'genre__slug')
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -145,28 +147,47 @@ class CategoryViewSet(mixins.ListModelMixin,
     lookup_field = 'slug'
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewCommentViewSet(viewsets.ModelViewSet):
+    def get_title(self):
+        title_id = self.kwargs.get("title_id")
+        if not Title.objects.filter(pk=title_id).exists():
+            raise TitleOrReviewNotFound
+        return Title.objects.get(pk=title_id)
+
+
+class ReviewViewSet(ReviewCommentViewSet):
     permission_classes = IsAuthorModeratorAdminOrReadOnly,
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
-    def get_patch_author(self):
-        if self.request.method != 'PATCH':
-            return self.request.user
-        return self.get_review().author
-
-    def get_title(self):
-        return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-
     def get_review(self):
-        return get_object_or_404(Review,
-                                 pk=self.kwargs.get("pk"),
-                                 title=self.kwargs.get("title_id"))
+        review_id = self.kwargs.get("pk")
+        if not Review.objects.filter(pk=review_id).exists():
+            raise TitleOrReviewNotFound
+        return Review.objects.get(pk=review_id)
 
     def get_queryset(self):
         return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
+        author = self.request.user
+        title = self.get_title()
+        if title.reviews.filter(author=author).exists():
+            raise IncorrectAuthorReview()
+        serializer.save(
+            author=author,
+            title=title
+        )
+
+    def get_patch_author(self):
+        if self.request.method != 'PATCH':
+            return self.request.user
+        if not (self.request.user.is_moderator()
+                or self.request.user.is_admin()):
+            return self.request.user
+        return self.get_review().author
+
+    def perform_update(self, serializer):
         author = self.get_patch_author()
         title = self.get_title()
         serializer.save(
@@ -175,26 +196,33 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(ReviewCommentViewSet):
     permission_classes = IsAuthorModeratorAdminOrReadOnly,
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
-    def get_patch_author(self):
-        if self.request.method != 'PATCH':
-            return self.request.user
-        return self.get_review().author
-
     def get_review(self):
-        return get_object_or_404(Review,
-                                 pk=self.kwargs.get("review_id"),
-                                 title=self.kwargs.get("title_id"))
+        review_id = self.kwargs.get("review_id")
+        print(self.kwargs)
+        if not Review.objects.filter(pk=review_id).exists():
+            raise TitleOrReviewNotFound
+        return Review.objects.get(pk=review_id)
 
     def get_queryset(self):
         return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        author = self.get_patch_author()
+        author = self.request.user
+        self.get_title()
+        review = self.get_review()
+        serializer.save(
+            author=author,
+            review=review
+        )
+
+    def perform_update(self, serializer):
+        author = self.request.user
+        self.get_title()
         review = self.get_review()
         serializer.save(
             author=author,
