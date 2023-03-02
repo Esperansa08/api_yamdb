@@ -153,16 +153,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_patch_author(self):
         if self.request.method != 'PATCH':
             return self.request.user
-        if not (self.request.user.is_moderator
-                or self.request.user.is_admin):
-            return self.request.user
         return self.get_review().author
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
 
     def get_review(self):
-        return get_object_or_404(Review, pk=self.kwargs.get("pk"))
+        return get_object_or_404(Review,
+                                 pk=self.kwargs.get("pk"),
+                                 title=self.kwargs.get("title_id"))
 
     def get_queryset(self):
         return self.get_title().reviews.all()
@@ -183,9 +182,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_patch_author(self):
         if self.request.method != 'PATCH':
-            return self.request.user
-        if not (self.request.user.is_moderator
-                or self.request.user.is_admin):
             return self.request.user
         return self.get_review().author
 
