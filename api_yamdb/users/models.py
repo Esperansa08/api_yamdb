@@ -43,7 +43,6 @@ class User(AbstractUser):
             self.Role.MODERATOR,
         }
 
-
     def __str__(self):
         return self.username
 
