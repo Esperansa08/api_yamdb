@@ -1,8 +1,10 @@
 from csv import DictReader
 
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
-from users.models import User
+
+User = get_user_model()
 
 message = 'Данные успешно загружены в табл.'
 success_message = 'Все данные успешно загружены'

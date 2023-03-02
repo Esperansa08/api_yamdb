@@ -62,8 +62,8 @@ def token(request):
     user = get_object_or_404(
         User, username=serializer.validated_data['username']
     )
-    token = serializer.validated_data['confirmation_code']
-    if not default_token_generator.check_token(user, token):
+    confirmation_code = serializer.validated_data['confirmation_code']
+    if not default_token_generator.check_token(user, confirmation_code):
         return Response(
             'Неверный код подтверждения', status=status.HTTP_400_BAD_REQUEST
         )
