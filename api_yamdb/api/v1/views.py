@@ -188,8 +188,8 @@ class ReviewViewSet(ReviewCommentViewSet):
     def get_patch_author(self):
         if self.request.method != 'PATCH':
             return self.request.user
-        if not (self.request.user.is_moderator()
-                or self.request.user.is_admin()):
+        if not (self.request.user.is_moderator
+                or self.request.user.is_admin):
             return self.request.user
         return self.get_review().author
 
