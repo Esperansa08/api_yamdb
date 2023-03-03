@@ -36,13 +36,6 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
-    def is_upperclass(self):
-        return self.role in {
-            self.Role.USER,
-            self.Role.ADMIN,
-            self.Role.MODERATOR,
-        }
-
     def __str__(self):
         return self.username
 
@@ -52,7 +45,9 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == self.Role.ADMIN
+        return (self.role == self.Role.ADMIN
+                or self.is_superuser
+        )
 
     @property
     def is_moderator(self):
