@@ -147,7 +147,6 @@ class CategoryViewSet(mixins.ListModelMixin,
 
 class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = IsAuthorModeratorAdminOrReadOnly,
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
     def get_title(self):
