@@ -153,11 +153,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
 
-    def get_review(self):
-        return get_object_or_404(Review,
-                                 pk=self.kwargs.get("pk"),
-                                 title=self.kwargs.get("title_id"))
-
     def get_queryset(self):
         return self.get_title().reviews.all()
 
@@ -165,11 +160,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(
             author=self.request.user,
             title=self.get_title()
-        )
-
-    def perform_update(self, serializer):
-        serializer.save(
-            author=self.get_review().author
         )
 
 
@@ -183,12 +173,6 @@ class CommentViewSet(viewsets.ModelViewSet):
                                  pk=self.kwargs.get("review_id"),
                                  title=self.kwargs.get("title_id"))
 
-    def get_comment(self):
-        return get_object_or_404(Comment,
-                                 pk=self.kwargs.get('pk'),
-                                 review=self.get_review()
-                                 )
-
     def get_queryset(self):
         return self.get_review().comments.all()
 
@@ -196,9 +180,4 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(
             author=self.request.user,
             review=self.get_review()
-        )
-
-    def perform_update(self, serializer):
-        serializer.save(
-            author=self.get_comment().author,
         )
