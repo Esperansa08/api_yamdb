@@ -150,11 +150,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
-    def get_patch_author(self):
-        if self.request.method != 'PATCH':
-            return self.request.user
-        return self.get_review().author
-
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
 
@@ -167,11 +162,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        author = self.get_patch_author()
-        title = self.get_title()
         serializer.save(
-            author=author,
-            title=title
+            author=self.request.user,
+            title=self.get_title()
+        )
+
+    def perform_update(self, serializer):
+        serializer.save(
+            author=self.get_review().author,
+            title=self.get_title()
         )
 
 
@@ -180,23 +179,28 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
-    def get_patch_author(self):
-        if self.request.method != 'PATCH':
-            return self.request.user
-        return self.get_review().author
-
     def get_review(self):
         return get_object_or_404(Review,
                                  pk=self.kwargs.get("review_id"),
                                  title=self.kwargs.get("title_id"))
 
+    def get_comment(self):
+        return get_object_or_404(Comment,
+                                 pk=self.kwargs.get('pk'),
+                                 review=self.get_review()
+                                 )
+
     def get_queryset(self):
         return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        author = self.get_patch_author()
-        review = self.get_review()
         serializer.save(
-            author=author,
-            review=review
+            author=self.request.user,
+            review=self.get_review()
+        )
+
+    def perform_update(self, serializer):
+        serializer.save(
+            author=self.get_comment().author,
+            review=self.get_review()
         )
