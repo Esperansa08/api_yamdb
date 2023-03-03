@@ -107,10 +107,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-
-    def get_queryset(self):
-        return Title.objects.all().annotate(
-            rating=Avg('reviews__score'))
+    queryset = Title.objects.all().annotate(
+        rating=Avg('reviews__score'))
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
