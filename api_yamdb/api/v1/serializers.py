@@ -1,5 +1,3 @@
-import datetime as dt
-
 from django.contrib.auth import get_user_model
 from django.core import validators
 from rest_framework import serializers
@@ -55,14 +53,6 @@ class TitleSerializerWrite(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'rating', 'description', 'genre',
                   'category')
-
-    def validate_year(self, value):
-        year_now = dt.date.today().year
-        print(year_now)
-        if value > year_now:
-            raise serializers.ValidationError(
-                'Передано некорректное значение года')
-        return value
 
 
 class ReviewSerializer(serializers.ModelSerializer):
