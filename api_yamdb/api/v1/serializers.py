@@ -122,7 +122,7 @@ class TokenSerializer(serializers.Serializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField(many=False, read_only=True)
+    author = serializers.StringRelatedField(many=False)
 
     class Meta:
         model = Comment
