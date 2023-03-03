@@ -26,7 +26,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.TextField(
+    name = models.CharField(
         max_length=256,
         verbose_name='название произведения',
         help_text='Введите название произведения')
