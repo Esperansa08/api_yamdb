@@ -5,7 +5,6 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title
-from .exceptions import IncorrectTitleInYear, IncorrectAuthorReview
 
 User = get_user_model()
 
@@ -60,7 +59,8 @@ class TitleSerializerWrite(serializers.ModelSerializer):
         year_now = dt.date.today().year
         print(year_now)
         if value > year_now:
-            raise IncorrectTitleInYear('Передано некорректное значение года')
+            raise serializers.ValidationError(
+                'Передано некорректное значение года')
         return value
 
 
@@ -75,7 +75,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         author = self.context['request'].user
         title = self.context['view'].get_title()
         if title.reviews.filter(author=author).exists():
-            raise IncorrectAuthorReview(
+            raise serializers.ValidationError(
                 'Этот автор уже оставлял отзыв к произведению')
         return value
 
@@ -122,7 +122,7 @@ class TokenSerializer(serializers.Serializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField(many=False, read_only=True)
+    author = serializers.StringRelatedField(many=False)
 
     class Meta:
         model = Comment
