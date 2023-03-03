@@ -137,7 +137,7 @@ class GenreViewSet(mixins.ListModelMixin,
 class CategoryViewSet(mixins.ListModelMixin,
                       mixins.CreateModelMixin, mixins.DestroyModelMixin,
                       viewsets.GenericViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('slug')
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
@@ -151,10 +151,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
     def get_title(self):
-        return get_object_or_404(Title, pk=self.kwargs.get("title_id"))
+        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
 
     def get_queryset(self):
-        return self.get_title().reviews.all()
+        return self.get_title().reviews.all().order_by('-pub_date')
 
     def perform_create(self, serializer):
         serializer.save(
@@ -170,8 +170,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_review(self):
         return get_object_or_404(Review,
-                                 pk=self.kwargs.get("review_id"),
-                                 title=self.kwargs.get("title_id"))
+                                 pk=self.kwargs.get('review_id'),
+                                 title=self.kwargs.get('title_id'))
 
     def get_queryset(self):
         return self.get_review().comments.all()
