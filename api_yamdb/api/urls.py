@@ -14,7 +14,8 @@ v1_router.register('users', UserViewSet, basename='user')
 
 v1_router.register(
     r'titles/(?P<title_id>\d+)/reviews',
-    viewset=ReviewViewSet
+    ReviewViewSet,
+    'review-list'
 )
 v1_router.register(
     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
