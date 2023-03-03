@@ -169,8 +169,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(
-            author=self.get_review().author,
-            title=self.get_title()
+            author=self.get_review().author
         )
 
 
@@ -202,5 +201,4 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(
             author=self.get_comment().author,
-            review=self.get_review()
         )
