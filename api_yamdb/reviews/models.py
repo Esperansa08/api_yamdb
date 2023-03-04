@@ -1,8 +1,8 @@
-import datetime as dt
-
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from .validators import validate_year
 
 User = get_user_model()
 
@@ -30,8 +30,8 @@ class Title(models.Model):
         max_length=256,
         verbose_name='название произведения',
         help_text='Введите название произведения')
-    year = models.IntegerField(
-        validators=[MaxValueValidator(dt.date.today().year)],
+    year = models.SmallIntegerField(
+        validators=[validate_year],
         verbose_name='год публикации',
         help_text='Введите год публикации произведения')
     genre = models.ManyToManyField(
@@ -106,7 +106,7 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Автор отзыва',
     )
-    score = models.IntegerField(
+    score = models.SmallIntegerField(
         validators=[
             MaxValueValidator(10),
             MinValueValidator(1)
