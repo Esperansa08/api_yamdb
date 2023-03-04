@@ -165,7 +165,6 @@ class CommentViewSet(viewsets.ModelViewSet):
                                  pk=self.kwargs.get('review_id'),
                                  title__id=self.kwargs.get('title_id'))
 
-
     def get_queryset(self):
         return self.get_review().comments.all()
 
